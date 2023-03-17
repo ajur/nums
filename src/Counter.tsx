@@ -25,7 +25,8 @@ export const Counter = () => {
       <input
         type="text"
         value={count}
-        className="h-12 w-12 rounded border-2 text-center"
+        readOnly
+        className="h-12 w-12 rounded text-center bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-100"
       />
 
       <CounterButton text="-" onClick={decrement} />

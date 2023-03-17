@@ -1,0 +1,1 @@
+declare function reloadTheme(): void;
