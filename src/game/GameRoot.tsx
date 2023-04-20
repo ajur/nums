@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 export default function GameRoot() {
+  console.log("Running game root");
   return (
     <div className="mx-auto max-w-screen-md p-4">
       <header className="mb-8">

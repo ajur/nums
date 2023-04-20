@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
-    "build-gh": "tsc && vite build --base=/nums/",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "build-gh": "tsc && vite build --base=/nums/",
+    "preview-gh": "vite preview --base=/nums/"
   },
   "dependencies": {
     "react": "^18.2.0",

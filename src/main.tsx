@@ -5,9 +5,12 @@ import { RouterProvider, createBrowserRouter, createHashRouter } from "react-rou
 import playgroundRouts from "./playground/routes";
 import gameRouts from "./game/routes";
 
-const createRouter = import.meta.env.BASE_URL === "/nums/" ? createHashRouter : createBrowserRouter;
+// Funny thing is, hash router doesn't work with base url set in router config
+// But it works without base, no matter what the actual base is.
+// so, we only use BASE_URL to determine if we are running on github pages and use hash router
+const createRouter = (import.meta.env.BASE_URL === "/nums/") ? createHashRouter : createBrowserRouter;
 
-const router = createRouter([
+const router = createHashRouter([
   {
     path: "/",
     ...gameRouts
@@ -17,7 +20,6 @@ const router = createRouter([
     ...playgroundRouts
   }
 ], { 
-  basename: import.meta.env.BASE_URL,
   future: {
     v7_normalizeFormMethod: true,
   },
