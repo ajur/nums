@@ -5,7 +5,7 @@ import Terminal from "vite-plugin-terminal";
 
 export default defineConfig({
   plugins: [react(), Terminal()],
-  base: "/nums/",
+  base: "/",
   resolve: {
     alias: {
       "~": resolve(__dirname, "src"),

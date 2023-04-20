@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, createHashRouter } from "react-router-dom";
 import playgroundRouts from "./playground/routes";
 import gameRouts from "./game/routes";
 
+const createRouter = import.meta.env.BASE_URL === "/nums/" ? createHashRouter : createBrowserRouter;
 
-const router = createBrowserRouter([
+const router = createRouter([
   {
     path: "/",
     ...gameRouts
@@ -16,7 +17,7 @@ const router = createBrowserRouter([
     ...playgroundRouts
   }
 ], { 
-  basename: "/nums/",
+  basename: import.meta.env.BASE_URL,
   future: {
     v7_normalizeFormMethod: true,
   },
