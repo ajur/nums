@@ -12,14 +12,14 @@ const CounterButton = ({ text, onClick }: CounterButtonProps) => (
   </button>
 );
 
-export const Counter = ({hide}: {hide?: boolean}) => {
+export const Counter = () => {
   const [count, setCount] = useState(0);
 
   const increment = () => setCount(count + 1);
   const decrement = () => setCount(count - 1);
 
   return (
-    <ContentBox hide={hide} description="Simple counter" className="space-x-2">
+    <ContentBox description="Simple counter" className="space-x-2">
       <CounterButton text="-" onClick={decrement} />
       <input
         type="text"

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ContentBox } from "./ContentBox";
 
-export const VariableGridSize = ({ hide }: { hide?: boolean }) => {
+export const VariableGridSize = () => {
   const [gridSize, setGridSize] = useState(6);
 
   return (
-    <ContentBox hide={hide} description="Variable grid size">
+    <ContentBox description="Variable grid size">
       <div className="mb-4 flex space-x-2 text-violet-300">
         <span>Grid size:</span>
         <input

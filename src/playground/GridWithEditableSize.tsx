@@ -14,11 +14,11 @@ const EditButton = ({
   </button>
 );
 
-export const GridWithEditableSize = ({ w, h, hide }: { w: number; h: number, hide?: boolean }) => {
+export const GridWithEditableSize = ({ w, h}: { w: number; h: number }) => {
   const [grid, setGrid] = useState(Array2D.from(w, h, 1));
 
   return (
-    <ContentBox hide={hide} description="Grid with editable size" className="flex gap-2">
+    <ContentBox description="Grid with editable size" className="flex gap-2">
       <div className="flex flex-col justify-center  gap-2 ">
         {/* grid left */}
         <EditButton label="+" onClick={() => setGrid(grid.addCols(0, 1, 0))} />

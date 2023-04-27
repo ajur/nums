@@ -12,7 +12,11 @@ export class Array2D<T> {
     public readonly data: T[],
     public readonly width: number,
     public readonly height: number
-  ) {}
+  ) {
+    if (data.length !== width * height) {
+      throw new Error('Array2D data length must be width * height');
+    }
+  }
 
   public static from<T>(
     width: number,
@@ -35,9 +39,9 @@ export class Array2D<T> {
   public with(x: number, y: number, val: T): Array2D<T> {
     const d2 = [...this.data];
     d2[xy2i(x, y, this.width)] = val;
-    return new Array2D(d2, this.width, d2.length / this.width);
+    return new Array2D(d2, this.width, this.height);
   }
-
+  
   public map<U>(mapper: Array2DMapper<T, U>): Array2D<U> {
     return new Array2D(
       this.data.map((v, i) => mapper(v, ...i2xy(i, this.width))),
@@ -120,6 +124,14 @@ export class Array2D<T> {
       a = a.addRows(this.height, height - this.height, val);
     }
     return a;
+  }
+
+  // serialize array to hex string where first byte is width, second byte is height, and the rest is data
+  public serialize(): string {
+    const width = this.width.toString(16).padStart(2, "0");
+    const height = this.height.toString(16).padStart(2, "0");
+    const data = this.data.map((v) => (+v).toString(16).padStart(2, "0"));
+    return width + height + data.join("");
   }
 
   public toString(): string {

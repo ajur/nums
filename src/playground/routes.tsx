@@ -5,7 +5,8 @@ import type { RouteObject } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { VariableGridSize } from "./VariableGridSize";
 import { GridWithEditableSize } from "./GridWithEditableSize";
-import { GridWithMarkableCells } from "./GridWithMarkableCells";
+import { MapEditorConcept } from "./MapEditorConcept";
+import { BoardConcept } from "./BoardConcept";
 
 export default {
   element: <Playground />,
@@ -32,8 +33,12 @@ export default {
     },
     {
       path: "mapEditor",
-      element: <GridWithMarkableCells />,
+      element: <MapEditorConcept />,
     },
+    {
+      path: "playMode/:boardMapString?",
+      element: <BoardConcept />,
+    }
   ],
 } satisfies RouteObject;
 
@@ -58,6 +63,11 @@ const menuItems = [
     title: "Map editor",
     description: "grid with markable cells, basis for simple map editor",
   },
+  {
+    path: "playMode",
+    title: "Board concept",
+    description: "concept for playable nums game board",
+  }
 ];
 
 function Index() {

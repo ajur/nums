@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Array2D } from "~/utils/Array2D";
 import { SimpleHistory } from "~/utils/SimpleHistory";
 import { ContentBox } from "./ContentBox";
+import { BoardMap } from "./boardMap";
+import { Link } from "react-router-dom";
 
 type PointerState = {
   value: boolean;
   startPos: [number, number];
-  startGrid: Array2D<boolean>;
+  pos: [number, number];
+  startGrid: BoardMap;
 }
 
 type NumberPickerProps = {
@@ -60,7 +62,7 @@ const ToggleSwitch = ({ on, onChange }: ToggleSwitchProps) => {
 
 
 type UndoRedoButtonsProps = {
-  history: SimpleHistory<Array2D<boolean>>;
+  history: SimpleHistory<BoardMap>;
   onUndo: () => void;
   onRedo: () => void;
 };
@@ -106,19 +108,18 @@ const UndoRedoButtons = ({history, onUndo, onRedo}: UndoRedoButtonsProps) => (
 )
 
 
-export const GridWithMarkableCells = ({
+export const MapEditorConcept = ({
   sizes = [5, 7, 11, 19],
   defaultSize = 11,
-  hide = false,
 }) => {
-  const [grid, setGrid] = useState(Array2D.from(defaultSize, defaultSize, false));
+  const [grid, setGrid] = useState(BoardMap.empty(defaultSize));
   const [isMarkArea, setIsMarkArea] = useState(false);
   
   const [isMarking, setIsMarking] = useState(false);
   const [pointerState, setPointerState] = useState<PointerState | null>(null);
   const [editHistory, setEditHistory] = useState(SimpleHistory.create(grid));
 
-  const setGridWithHistory = (newGrid: Array2D<boolean>) => {
+  const setGridWithHistory = (newGrid: BoardMap) => {
     setGrid(newGrid);
     setEditHistory(editHistory.set(newGrid));
   };
@@ -136,7 +137,7 @@ export const GridWithMarkableCells = ({
   };
 
   const handleSizeChange = (newSize: number): void => {
-    setGridWithHistory(grid.resize(newSize, newSize, false));
+    setGridWithHistory(grid.resize(newSize));
   };
 
   const pointerStarted = (x: number, y: number): void => {
@@ -145,31 +146,25 @@ export const GridWithMarkableCells = ({
     setPointerState({
       value,
       startPos: [x, y],
+      pos: [x, y],
       startGrid: grid,
     });
-    setGrid(grid.with(x, y, value));
+    setGrid(grid.set(x, y, value));
   };
 
   const pointerMove = (x: number, y: number): void => {
     if (isMarking && pointerState !== null) {
-      if (!isMarkArea) {
-        setGrid(grid.with(x, y, pointerState.value));
-      } else {
-        // mark rectangular area
-        const { startPos, startGrid } = pointerState;
-        const [x0, y0] = startPos;
-        const xMin = Math.min(x0, x);
-        const xMax = Math.max(x0, x);
-        const yMin = Math.min(y0, y);
-        const yMax = Math.max(y0, y);
-        const newGrid = startGrid.map((v, x, y) => {
-          if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            return pointerState.value;
-          }
-          return v;
-        });
-        setGrid(newGrid);
+      if (pointerState.pos[0] === x && pointerState.pos[1] === y) {
+        return;
       }
+      console.log("pointer pos changed");
+      if (!isMarkArea) {
+        setGrid(grid.set(x, y, pointerState.value));
+      } else {
+        const { startPos, startGrid } = pointerState;
+        setGrid(startGrid.setRect(startPos, [x, y], pointerState.value));
+      }
+      setPointerState({ ...pointerState, pos: [x, y] });
     }
   };
 
@@ -202,7 +197,8 @@ export const GridWithMarkableCells = ({
   });
 
   return (
-    <ContentBox hide={hide} description="Game board editor">
+    <>
+    <ContentBox description="Game board editor">
       <div className="mb-2">
         <svg
           className="inline mr-1 w-4 h-4 text-slate-800 dark:text-slate-100"
@@ -216,11 +212,11 @@ export const GridWithMarkableCells = ({
             clipRule="evenodd"
           />
         </svg>
-        <NumberPicker value={grid.width} numbers={sizes} onChange={handleSizeChange} />
+        <NumberPicker value={grid.size} numbers={sizes} onChange={handleSizeChange} />
       </div>
       <div className="mb-2">
-        <button onClick={() => setGridWithHistory(grid.map(() => false))} className="dark:text-slate-100 dark:bg-slate-800 px-2 rounded">Clear</button>
-        <button onClick={() => setGridWithHistory(grid.map(() => true))} className="dark:text-slate-100 dark:bg-slate-800 px-2 rounded ml-2">Fill</button>
+        <button onClick={() => setGridWithHistory(grid.empty())} className="dark:text-slate-100 dark:bg-slate-800 px-2 rounded">Clear</button>
+        <button onClick={() => setGridWithHistory(grid.full())} className="dark:text-slate-100 dark:bg-slate-800 px-2 rounded ml-2">Fill</button>
         <span className="mx-2">
           <svg
             className=" mr-1 inline w-4 h-4 text-slate-800 dark:text-slate-100"
@@ -252,11 +248,10 @@ export const GridWithMarkableCells = ({
         <UndoRedoButtons history={editHistory} onUndo={handleUndo} onRedo={handleRedo} />
       </div>
       <div
-        
-        className={`grid flex-1 touch-none gap-0.5 grid-cols-${grid.width}`}
+        className={`grid flex-1 touch-none gap-0.5 grid-cols-${grid.size}`}
       >
         {
-          grid.map((val, x, y) => (
+          grid.mapToArray((val, x, y) => (
             <div
               key={`${x}x${y}`}
               onPointerDown={(evt) => {
@@ -275,9 +270,22 @@ export const GridWithMarkableCells = ({
                 (val ? "bg-sky-500" : "dark:bg-slate-800 bg-white")
               }
             ></div>
-          )).data
+          ))
         }
       </div>
     </ContentBox>
+
+    <ContentBox description="Serialized game board data">
+      <textarea
+        rows={2}
+        className="w-full text-slate-400 dark:bg-slate-800 p-1"
+        value={grid.encode()}
+        readOnly
+      />
+      <div className="mt-1">
+        <Link to={`../playMode/${grid.encode()}`} className="dark:text-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Open in play mode</Link>
+      </div>
+    </ContentBox>
+    </>
   );
 };
